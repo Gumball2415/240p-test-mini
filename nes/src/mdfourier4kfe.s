@@ -9,6 +9,9 @@ MAPPERNUM = 7
 ; and can affect noise
 MDF_PA13_HIGH = 1
 
+; Strobing controller 1 is also rumored to interfere with audio
+MDF_NO_JOY1 = 0
+
 test_good_phase := test_state+6
 
 
@@ -172,11 +175,25 @@ have_phase_xy:
   sta PPUMASK
 
   ; Wait for A press
+  .if ::MDF_NO_JOY1
+    ; read pads only after 1 test
+    lda mdfourier_good_phase
+    beq keywait
+    ; Display the copyright screen for 5-ish seconds
+    lda #$FF
+    :
+    cmp nmis
+    bne :-
+    jmp skippads
+  .endif
+  
   keywait:
     jsr read_pads
     jsr vsync
     lda new_keys
     bpl keywait
+
+  skippads:
 
   ; reduce interference from the PPU as far as we possibly can
   ldy #$3F
@@ -227,6 +244,12 @@ have_phase_xy:
   no_B_press:
   jsr vsync
   jsr mdfourier_push_apu
+  .if ::MDF_NO_JOY1
+    lda mdfourier_good_phase
+    beq :+
+    rts
+    :
+  .endif
   jmp read_pads
 .endproc
 
