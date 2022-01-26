@@ -179,8 +179,8 @@ have_phase_xy:
     ; read pads only after 1 test
     lda mdfourier_good_phase
     beq keywait
-    ; Display the copyright screen for 5-ish seconds
-    lda #$FF
+    ; Display the copyright screen for 2 seconds
+    lda #$78
     :
     cmp nmis
     bne :-
